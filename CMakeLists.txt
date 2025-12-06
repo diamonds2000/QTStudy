@@ -8,7 +8,16 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Widgets Gui Svg)
+# Set default build type to Debug if not specified
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Debug)
+endif()
+
+# Add debug-specific compiler flags
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -Wall -DDEBUG")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
+
+find_package(Qt6 REQUIRED COMPONENTS Core Widgets Gui)
 
 qt6_add_resources(RESOURCE_FILES resources.qrc)
 
@@ -25,7 +34,6 @@ target_link_libraries(QTStudy PRIVATE
     Qt6::Core
     Qt6::Widgets
     Qt6::Gui
-    Qt6::Svg
 )
 
 target_sources(QTStudy PRIVATE ${RESOURCE_FILES})

@@ -5,8 +5,10 @@
 #include <QMenuBar>
 #include <QToolBar>
 #include <QDockWidget>
+#include <QLineEdit>
 #include <QTreeView>
 #include <QTreeWidget>
+#include <QVBoxLayout>
 
 class DrawView;
 
@@ -17,6 +19,12 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+
+private slots:
+    void cut();
+    void copy();
+    void paste();
+    void about();
 
 private:
     void createMenus();

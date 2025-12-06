@@ -4,12 +4,18 @@
 #include <QAction>
 #include <QApplication>
 #include <QTreeWidgetItem>
+#include <QVBoxLayout>
 #include <QIcon>
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     setWindowTitle(tr("QT Study"));
+    
+    // Allow main window to be resized freely in both directions
+    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+    setMinimumSize(400, 300);  // Set a reasonable minimum size
     
     // Create central draw view
     m_drawView = new DrawView(this);
@@ -30,6 +36,26 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
+}
+
+void MainWindow::cut()
+{
+    QMessageBox::information(this, tr("Cut"), tr("Cut action triggered"));
+}
+
+void MainWindow::copy()
+{
+    QMessageBox::information(this, tr("Copy"), tr("Copy action triggered"));
+}
+
+void MainWindow::paste()
+{
+    QMessageBox::information(this, tr("Paste"), tr("Paste action triggered"));
+}
+
+void MainWindow::about()
+{
+    QMessageBox::about(this, tr("About"), tr("QT Study Application\nA simple Qt application for learning purposes."));
 }
 
 void MainWindow::createMenus()
@@ -62,15 +88,20 @@ void MainWindow::createMenus()
 void MainWindow::createToolBars()
 {
     m_toolBar = addToolBar(tr("Main"));
+    m_toolBar->setMovable(false);
 
     QAction* newAct = m_toolBar->addAction(style()->standardIcon(QStyle::SP_FileIcon), tr("&New"));
     QAction* openAct = m_toolBar->addAction(style()->standardIcon(QStyle::SP_DialogOpenButton), tr("&Open"));
     m_toolBar->addSeparator();
     QAction* cutAct = m_toolBar->addAction(QIcon(":/icons/cut32.png"), tr("Cu&t"));
+    connect(cutAct, &QAction::triggered, this, &MainWindow::cut);
     QAction* copyAct = m_toolBar->addAction(QIcon(":/icons/copy32.png"), tr("&Copy"));
+    connect(copyAct, &QAction::triggered, this, &MainWindow::copy);
     QAction* pasteAct = m_toolBar->addAction(QIcon(":/icons/paste32.png"), tr("&Paste"));
+    connect(pasteAct, &QAction::triggered, this, &MainWindow::paste);
     m_toolBar->addSeparator();
     QAction* aboutAct = m_toolBar->addAction(QIcon(":/icons/about32.png"), tr("&About"));
+    connect(aboutAct, &QAction::triggered, this, &MainWindow::about);
 }
 
 void MainWindow::createDockWindows()
@@ -79,11 +110,27 @@ void MainWindow::createDockWindows()
     m_treeDock = new QDockWidget(tr("Navigation"), this);
     m_treeDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     
+    // Create a widget to hold both the line edit and tree view
+    QWidget *contentWidget = new QWidget(m_treeDock);
+    
+    // Create layout for the content widget
+    QVBoxLayout *layout = new QVBoxLayout(contentWidget);
+    layout->setContentsMargins(5, 5, 5, 5); // Small margins
+    layout->setSpacing(5); // Small spacing between widgets
+    
+    // Create line edit (single line text input)
+    QLineEdit *lineEdit = new QLineEdit(contentWidget);
+    lineEdit->setPlaceholderText(tr("Enter notes here..."));
+    
     // Create tree view
-    m_treeView = new QTreeWidget(m_treeDock);
+    m_treeView = new QTreeWidget(contentWidget);
     m_treeView->setHeaderLabel(tr("Items"));
     
-    // Add some sample items
+    // Add widgets to layout (line edit above tree view)
+    layout->addWidget(lineEdit);
+    layout->addWidget(m_treeView);
+    
+    // Add some sample items to tree view
     QTreeWidgetItem *item1 = new QTreeWidgetItem(m_treeView);
     item1->setText(0, tr("Item 1"));
     
@@ -98,6 +145,7 @@ void MainWindow::createDockWindows()
     
     m_treeView->expandAll();
     
-    m_treeDock->setWidget(m_treeView);
+    // Set the content widget in the dock
+    m_treeDock->setWidget(contentWidget);
     addDockWidget(Qt::LeftDockWidgetArea, m_treeDock);
 }
