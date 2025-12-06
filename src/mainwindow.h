@@ -5,10 +5,7 @@
 #include <QMenuBar>
 #include <QToolBar>
 #include <QDockWidget>
-#include <QLineEdit>
-#include <QTreeView>
 #include <QTreeWidget>
-#include <QVBoxLayout>
 
 class DrawView;
 
@@ -25,6 +22,7 @@ private slots:
     void copy();
     void paste();
     void about();
+    void onCheckBoxStateChanged(int state);
 
 private:
     void createMenus();

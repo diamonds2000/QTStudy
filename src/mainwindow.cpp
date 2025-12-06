@@ -2,11 +2,16 @@
 #include "drawview.h"
 #include <QMenu>
 #include <QAction>
+#include <QWidgetAction>
 #include <QApplication>
 #include <QTreeWidgetItem>
 #include <QVBoxLayout>
 #include <QIcon>
 #include <QMessageBox>
+#include <QLineEdit>
+//#include <QTreeView>
+#include <QVBoxLayout>
+#include <QCheckBox>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -58,6 +63,11 @@ void MainWindow::about()
     QMessageBox::about(this, tr("About"), tr("QT Study Application\nA simple Qt application for learning purposes."));
 }
 
+void MainWindow::onCheckBoxStateChanged(int state)
+{
+    QMessageBox::information(this, tr("Checked"), tr("Checked action triggered"));
+}
+
 void MainWindow::createMenus()
 {
     m_menuBar = menuBar();
@@ -100,8 +110,17 @@ void MainWindow::createToolBars()
     QAction* pasteAct = m_toolBar->addAction(QIcon(":/icons/paste32.png"), tr("&Paste"));
     connect(pasteAct, &QAction::triggered, this, &MainWindow::paste);
     m_toolBar->addSeparator();
+
     QAction* aboutAct = m_toolBar->addAction(QIcon(":/icons/about32.png"), tr("&About"));
     connect(aboutAct, &QAction::triggered, this, &MainWindow::about);
+    m_toolBar->addSeparator();
+    
+    // Add checkbox to toolbar
+    QCheckBox *checkBox = new QCheckBox(tr("Checkbox"), m_toolBar);
+    QWidgetAction *checkableAction = new QWidgetAction(m_toolBar);
+    checkableAction->setDefaultWidget(checkBox);
+    m_toolBar->addAction(checkableAction);
+    connect(checkBox, &QCheckBox::stateChanged, this, &MainWindow::onCheckBoxStateChanged);
 }
 
 void MainWindow::createDockWindows()
