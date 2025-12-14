@@ -121,6 +121,13 @@ void MainWindow::createToolBars()
     checkableAction->setDefaultWidget(checkBox);
     m_toolBar->addAction(checkableAction);
     connect(checkBox, &QCheckBox::stateChanged, this, &MainWindow::onCheckBoxStateChanged);
+
+    m_toolBar->addSeparator();
+    QAction* resetAct = m_toolBar->addAction(QIcon(":/icons/reset32.png"), tr("&Reset"));
+    connect(resetAct, &QAction::triggered, m_drawView, &DrawView::reset);
+
+    QAction* stepForwardAct = m_toolBar->addAction(QIcon(":/icons/next32.png"), tr("Next"));
+    connect(stepForwardAct, &QAction::triggered, m_drawView, &DrawView::stepForward);
 }
 
 void MainWindow::createDockWindows()

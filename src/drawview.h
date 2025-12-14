@@ -9,6 +9,8 @@
 #include <QVector>
 #include <QList>
 
+class Trianglation;
+
 class DrawView : public QWidget
 {
     Q_OBJECT
@@ -22,10 +24,14 @@ protected:
     void mouseMoveEvent(QMouseEvent *event) override;
     void paintEvent(QPaintEvent *event) override;
 
+public slots:
+    void reset();
+    void stepForward();
+
 private:
-    QVector<QPoint> m_currentPoints;
-    QList<QVector<QPoint>> m_pointsList;
-    bool m_drawing;
+    QVector<QPoint> m_Points;
+
+    Trianglation *m_trianglation = nullptr;
 };
 
 #endif // DRAWVIEW_H

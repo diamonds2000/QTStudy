@@ -1,4 +1,6 @@
 #include "drawview.h"
+#include "trianglation.h"
+
 #include <QPainter>
 #include <QMouseEvent>
 #include <QPaintEvent>
@@ -6,7 +8,6 @@
 
 DrawView::DrawView(QWidget *parent)
     : QWidget(parent)
-    , m_drawing(false)
 {
     setAttribute(Qt::WA_StaticContents);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -20,51 +21,68 @@ DrawView::DrawView(QWidget *parent)
 
 void DrawView::mousePressEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton) {
-        m_currentPoints.append(event->pos());
-        m_drawing = true;
+    if (event->button() == Qt::LeftButton) 
+    {
+        m_Points.append(event->pos());
     }
 }
 
 void DrawView::mouseReleaseEvent(QMouseEvent *event)
 {
-    if (m_drawing) 
-    {
-        if (!m_currentPoints.isEmpty())
-        {
-            m_pointsList.append(m_currentPoints);
-            m_currentPoints.clear();
-        }
-        
-        m_drawing = false;
-    }
+    QWidget::mouseReleaseEvent(event);
+    update();
 }
 
 void DrawView::mouseMoveEvent(QMouseEvent *event)
 {
-    if (m_drawing && (event->buttons() & Qt::LeftButton)) {
-        m_currentPoints.append(event->pos());
-        update();
-    }
+    QWidget::mouseMoveEvent(event);
 }
 
 void DrawView::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
-    painter.setPen(QPen(Qt::black, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    painter.setPen(QPen(Qt::black, 5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
     
-    for (auto points : m_pointsList) 
+    for (const QPoint& point : m_Points) 
     {
-        for (int i = 1; i < points.size(); i++) 
-        {
-            painter.drawLine(points[i - 1], points[i]);
-        }
+        painter.drawPoint(point);
     }
 
-    for (int i = 1; i < m_currentPoints.size(); i++)
+    if (m_trianglation)
     {
-        painter.drawLine(m_currentPoints[i - 1], m_currentPoints[i]);
+        QVector<QPoint> trianglePoints;
+        m_trianglation->getTrianglePoints(trianglePoints);
+
+        painter.setPen(QPen(Qt::blue, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        for (int i = 0; i + 2 < trianglePoints.size(); i += 3)
+        {
+            painter.drawLine(trianglePoints[i + 0], trianglePoints[i + 1]);
+            painter.drawLine(trianglePoints[i + 1], trianglePoints[i + 2]);
+            painter.drawLine(trianglePoints[i + 2], trianglePoints[i + 0]);
+        }
     }
     
     QWidget::paintEvent(event);
+}
+
+
+void DrawView::reset()
+{
+    m_Points.clear();
+    delete m_trianglation;
+    m_trianglation = nullptr;
+
+    update();
+}
+
+void DrawView::stepForward()
+{
+    if (!m_trianglation)
+    {
+        m_trianglation = new Trianglation(m_Points);
+    }
+
+    m_trianglation->stepForward();
+    
+    update();
 }

@@ -4,5 +4,7 @@
         <file>icons/copy32.png</file>
         <file>icons/paste32.png</file>
         <file>icons/about32.png</file>
+        <file>icons/next32.png</file>
+        <file>icons/reset32.png</file>
     </qresource>
 </RCC>

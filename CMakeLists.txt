@@ -14,7 +14,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # Add debug-specific compiler flags
-set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -Wall -DDEBUG")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -Wall -Wno-unused-variable -DDEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
 
 find_package(Qt6 REQUIRED COMPONENTS Core Widgets Gui)
@@ -27,6 +27,8 @@ add_executable(QTStudy
     src/mainwindow.h
     src/drawview.cpp
     src/drawview.h
+    src/trianglation.cpp
+    src/trianglation.h
     ${RESOURCE_FILES}
 )
 
