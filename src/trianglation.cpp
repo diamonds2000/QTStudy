@@ -98,8 +98,12 @@ void Trianglation::stepForward()
         return;
     }
 
-    if (m_currentPointIndex >= m_points.size())
+    // finished
+    if (m_currentPointIndex >= m_points.size() - 4)  // the last 4 points are super triangle points
+    {
+        deleteSuperTriangles();
         return;
+    }
 
     QVector2D pt = m_points[m_currentPointIndex];
 
@@ -133,19 +137,18 @@ void Trianglation::stepForward()
         {
             edgeCountMap[edge] += 1;
         }
-
-        m_triangles.removeAt(index);
     }
 
-    for (QMap<QPair<qsizetype, qsizetype>, int>::iterator edge = edgeCountMap.begin(); edge != edgeCountMap.end(); ++edge)
+    for (qsizetype i = badTriangleIndices.size() - 1; i >= 0; i--)
+    {
+        m_triangles.removeAt(badTriangleIndices[i]);
+    }
+
+    for (auto edge = edgeCountMap.begin(); edge != edgeCountMap.end(); ++edge)
     {
         if (edge.value() == 1)
         {
-            addTriangle(
-                edge.key().first,
-                edge.key().second,
-                m_currentPointIndex
-            );
+            addTriangle(edge.key().first, edge.key().second, m_currentPointIndex);
         }
     }
 
@@ -181,10 +184,10 @@ void Trianglation::generateSuperTriangles()
     min -= QVector2D(30.0, 30.0);
     max += QVector2D(30.0, 30.0);
 
-    QVector2D p1 = QVector2D(min.x(), min.y());
-    QVector2D p2 = QVector2D(max.x(), min.y());
-    QVector2D p3 = QVector2D(max.x(), max.y());
-    QVector2D p4 = QVector2D(min.x(), max.y());
+    QVector2D p1 = QVector2D(min.x(), min.y());  //left-top
+    QVector2D p2 = QVector2D(max.x(), min.y());  //right-top
+    QVector2D p3 = QVector2D(max.x(), max.y() + 30);  //right-bottom, +30 to avoid cocircular
+    QVector2D p4 = QVector2D(min.x(), max.y());  //left-bottom
 
     qsizetype baseIndex = m_points.size();
 
@@ -194,6 +197,27 @@ void Trianglation::generateSuperTriangles()
     m_points.push_back(p4);
 
     addTriangle(baseIndex + 0, baseIndex + 1, baseIndex + 3);
-    addTriangle(baseIndex + 1, baseIndex + 3, baseIndex + 3);
+    addTriangle(baseIndex + 1, baseIndex + 3, baseIndex + 2);
 }
 
+void Trianglation::deleteSuperTriangles()
+{
+    if (m_points.size() < 4)
+        return;
+
+    qsizetype baseIndex = m_points.size() - 4;
+
+    for (qsizetype i = m_triangles.size() - 1; i >= 0; i--)
+    {
+        const Triangle& triangle = m_triangles[i];
+        if (triangle.p1 >= baseIndex || triangle.p2 >= baseIndex || triangle.p3 >= baseIndex)
+        {
+            m_triangles.removeAt(i);
+        }
+    }
+
+    m_points.removeLast();
+    m_points.removeLast();
+    m_points.removeLast();
+    m_points.removeLast();
+}

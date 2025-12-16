@@ -41,6 +41,7 @@ public:
 private:
     void addTriangle(qsizetype p1, qsizetype p2, qsizetype p3);
     void generateSuperTriangles();
+    void deleteSuperTriangles();
 
 private:
     qsizetype m_currentPointIndex = 0;
