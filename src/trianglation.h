@@ -1,45 +1,50 @@
 #ifndef TRIANGLATION_H
 #define TRIANGULATION_H 
 
-#include <QPoint>
+
 #include <QVector>
 #include <QList>
+#include <QVector2D>
 
 
 class Triangle
 {
 public:
     Triangle() = default;
-    Triangle(QPoint p1, QPoint p2, QPoint p3)
-    {
-        this->p1 = p1;
-        this->p2 = p2;
-        this->p3 = p3;
-    }
+    Triangle(qsizetype p1, qsizetype p2, qsizetype p3, const QVector2D* points);
     ~Triangle() = default;
 
-    QPoint calculateCircle();
+    QVector2D calculateCircle();
 
-    QPoint p1;
-    QPoint p2;
-    QPoint p3;
+    void getCircumCircle(QVector2D& center, double& radius);
 
-    QPoint circumcenter;
+    qsizetype p1;
+    qsizetype p2;
+    qsizetype p3;
+    QVector2D* m_points;
+
+    QVector2D circumcenter;
     double radius;
 };
 
 class Trianglation
 {
 public:
-    Trianglation(const QVector<QPoint>& points);
+    Trianglation(const QVector<QVector2D>& points);
     ~Trianglation();
 
     void stepForward();
 
-    void getTrianglePoints(QVector<QPoint>& points);
+    void getTrianglePoints(QVector<QVector2D>& points);
+    void getCircumCirclePoints(QVector<QVector2D>& centers, QVector<double>& radii);
 
 private:
-    QVector<QPoint> m_points;
+    void addTriangle(qsizetype p1, qsizetype p2, qsizetype p3);
+    void generateSuperTriangles();
+
+private:
+    qsizetype m_currentPointIndex = 0;
+    QVector<QVector2D> m_points;
     QList<Triangle> m_triangles;
 };
 
