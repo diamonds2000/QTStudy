@@ -27,8 +27,12 @@ add_executable(QTStudy
     src/mainwindow.h
     src/drawview.cpp
     src/drawview.h
+    src/waveview.cpp
+    src/waveview.h
     src/trianglation.cpp
     src/trianglation.h
+    src/ringbuffer.cpp
+    src/ringbuffer.h
     ${RESOURCE_FILES}
 )
 

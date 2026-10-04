@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "drawview.h"
+#include "waveview.h"
 #include <QMenu>
 #include <QAction>
 #include <QWidgetAction>
@@ -12,6 +13,7 @@
 //#include <QTreeView>
 #include <QVBoxLayout>
 #include <QCheckBox>
+#include "ringbuffer.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -22,9 +24,9 @@ MainWindow::MainWindow(QWidget *parent)
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     setMinimumSize(400, 300);  // Set a reasonable minimum size
     
-    // Create central draw view
-    m_drawView = new DrawView(this);
-    setCentralWidget(m_drawView);
+    // Create central wave view
+    m_waveView = new WaveView(this);
+    setCentralWidget(m_waveView);
     
     // Create menus
     createMenus();
@@ -41,6 +43,10 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
+    if (m_ringBuffer) {
+        delete m_ringBuffer;
+        m_ringBuffer = nullptr;
+    }
 }
 
 void MainWindow::cut()
@@ -120,14 +126,15 @@ void MainWindow::createToolBars()
     QWidgetAction *checkableAction = new QWidgetAction(m_toolBar);
     checkableAction->setDefaultWidget(checkBox);
     m_toolBar->addAction(checkableAction);
-    connect(checkBox, &QCheckBox::stateChanged, this, &MainWindow::onCheckBoxStateChanged);
+    connect(checkBox, &QCheckBox::checkStateChanged, this, &MainWindow::onCheckBoxStateChanged);
 
     m_toolBar->addSeparator();
     QAction* resetAct = m_toolBar->addAction(QIcon(":/icons/reset32.png"), tr("&Reset"));
-    connect(resetAct, &QAction::triggered, m_drawView, &DrawView::reset);
+    //connect(resetAct, &QAction::triggered, m_drawView, &DrawView::reset);
 
     QAction* stepForwardAct = m_toolBar->addAction(QIcon(":/icons/next32.png"), tr("Next"));
-    connect(stepForwardAct, &QAction::triggered, m_drawView, &DrawView::stepForward);
+    //connect(stepForwardAct, &QAction::triggered, m_drawView, &DrawView::stepForward);
+    connect(stepForwardAct, &QAction::triggered, this, &MainWindow::startCapture);
 }
 
 void MainWindow::createDockWindows()
@@ -174,4 +181,23 @@ void MainWindow::createDockWindows()
     // Set the content widget in the dock
     m_treeDock->setWidget(contentWidget);
     addDockWidget(Qt::LeftDockWidgetArea, m_treeDock);
+}
+
+static double create_value() {
+    return rand() % 100; // Random value between 0 and 99
+}
+
+void MainWindow::startCapture()
+{
+    if (!m_ringBuffer) {
+        m_ringBuffer = new RingBuffer(1000); 
+    }
+    m_waveView->setModel(m_ringBuffer);
+
+    m_timer.start(5); // Update every 10 ms
+    connect(&m_timer, &QTimer::timeout, this, [this]() {
+        double newValue = create_value();
+        m_ringBuffer->enqueue(newValue);
+    });
+    m_waveView->startAnimation();
 }

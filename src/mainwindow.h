@@ -6,8 +6,11 @@
 #include <QToolBar>
 #include <QDockWidget>
 #include <QTreeWidget>
+#include <QTimer>
 
 class DrawView;
+class WaveView;
+class RingBuffer;
 
 class MainWindow : public QMainWindow
 {
@@ -24,15 +27,21 @@ private slots:
     void about();
     void onCheckBoxStateChanged(int state);
 
+    void startCapture();
+
 private:
     void createMenus();
     void createToolBars();
     void createDockWindows();
     
-    DrawView *m_drawView;
+    //DrawView *m_drawView;
+    WaveView *m_waveView;
     QMenuBar *m_menuBar;
     QToolBar *m_toolBar;
     QDockWidget *m_treeDock;
     QTreeWidget *m_treeView;
+
+    RingBuffer* m_ringBuffer = nullptr;
+    QTimer m_timer;
 };
 #endif // MAINWINDOW_H
